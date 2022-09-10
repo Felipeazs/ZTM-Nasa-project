@@ -2,7 +2,7 @@ const http = require('http')
 const app = require('./app')
 const dotenv = require('dotenv').config()
 
-const { success, info, error } = require('../colors-config')
+const { info } = require('../colors-config')
 
 const PORT = process.env.PORT || 8001
 
