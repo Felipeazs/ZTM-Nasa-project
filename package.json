@@ -1,0 +1,22 @@
+{
+	"name": "02-nasa",
+	"version": "1.0.0",
+	"description": "ZTM Nasa project",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"server": "npm start --prefix server",
+		"client": "npm start --prefix client",
+		"dev": "npm run client & npm run server"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Felipeazs/ZTM-Nasa-project.git"
+	},
+	"author": "felipeazs",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Felipeazs/ZTM-Nasa-project/issues"
+	},
+	"homepage": "https://github.com/Felipeazs/ZTM-Nasa-project#readme"
+}
