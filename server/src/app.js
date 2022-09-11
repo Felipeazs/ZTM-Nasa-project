@@ -8,6 +8,13 @@ const launchesRouter = require('./router/launches-router')
 const app = express()
 app.use(express.json())
 
+//CORS
+app.use(
+    cors({
+        origin: 'http://localhost:3000',
+    })
+)
+
 //routes: always before serving static files
 app.use('/planets', planetsRouter)
 app.use('/launches', launchesRouter)
@@ -19,12 +26,5 @@ app.use(express.static(path.join(__dirname, '..', 'public')))
 app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'))
 })
-
-//CORS
-app.use(
-    cors({
-        origin: 'http://localhost:3000',
-    })
-)
 
 module.exports = app
