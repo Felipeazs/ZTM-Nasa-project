@@ -26,7 +26,7 @@ describe('test POST /launches', () => {
         mission: 'FAZS-TEST',
         rocket: 'NCC-21JJ',
         target: 'Kepler-186f',
-        launchDate: 'zoot',
+        launchDate: 'nothing',
     }
     test('is should response with 201 created', async () => {
         //supertest api
