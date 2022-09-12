@@ -1,5 +1,5 @@
 {
-	"name": "02-nasa",
+	"name": "nasa-project",
 	"version": "1.0.0",
 	"description": "ZTM Nasa project",
 	"main": "index.js",

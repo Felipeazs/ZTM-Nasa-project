@@ -1,5 +1,5 @@
 {
-    "name": "server",
+    "name": "nasa-api",
     "version": "1.0.0",
     "description": "Nasa server-side project",
     "main": "src/server.js",
