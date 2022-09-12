@@ -4,8 +4,10 @@
     "description": "Nasa server-side project",
     "main": "src/server.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon src/server.js"
+        "test": "jest",
+        "test-watch": "jest --watch",
+        "watch": "nodemon src/server.js",
+        "start": "node src/server.js"
     },
     "author": "felipeazs",
     "license": "ISC",
@@ -17,6 +19,8 @@
     "devDependencies": {
         "colors": "^1.4.0",
         "dotenv": "^16.0.2",
-        "nodemon": "^2.0.19"
+        "jest": "^29.0.3",
+        "nodemon": "^2.0.19",
+        "supertest": "^6.2.4"
     }
 }

@@ -29,7 +29,7 @@ const httpAddNewLaunch = (req, res, next) => {
 
     addNewLaunch(newLaunch)
 
-    return res.status(200).json(newLaunch)
+    return res.status(201).json(newLaunch)
 }
 
 const httpAbortLaunch = (req, res, next) => {
