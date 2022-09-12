@@ -21,7 +21,7 @@ const httpAddNewLaunch = async (req, res, next) => {
         return res.status(400).json({ error: 'Missing required launch property' })
     }
 
-    const latestFlight = await Launch.findOne().sort('-flightNumber')
+    const latestFlight = await Launch.findOne().sort({ flightNumber: -1 })
 
     if (!latestFlight) {
         latestFlight.flightNumber = 100
@@ -32,8 +32,9 @@ const httpAddNewLaunch = async (req, res, next) => {
         rocket,
         target,
         success: true,
+        upcoming: true,
         customers: ['ZTM', 'NASA'],
-        flightNumber: latestFlight.flightNumber++,
+        flightNumber: latestFlight.flightNumber + 1,
         launchDate: new Date(launchDate),
     }
 
@@ -46,25 +47,33 @@ const httpAddNewLaunch = async (req, res, next) => {
     try {
         createdLaunch = await Launch.create(newLaunch)
     } catch (err) {
-        if (!err.statusCode) {
-            err.statusCode = 500
-        }
         next(err)
     }
 
     return res.status(201).json(createdLaunch)
 }
 
-const httpAbortLaunch = (req, res, next) => {
+const httpAbortLaunch = async (req, res, next) => {
     const launchId = +req.params.id
 
-    if (!existsLaunchWithID(launchId)) {
+    const foundLaunch = await Launch.findOne({ flightNumber: launchId })
+
+    if (!foundLaunch) {
         return res.status(400).json({ message: 'Launch not found' })
     }
 
-    const aborted = abortLaunchById(launchId)
+    let abortedLaunch
 
-    return res.status(200).json(aborted)
+    try {
+        abortedLaunch = await Launch.updateOne(
+            { flightNumber: launchId },
+            { upcoming: false, success: false }
+        )
+    } catch (error) {
+        next(error)
+    }
+
+    return res.status(200).json(abortedLaunch)
 }
 
 module.exports = { httpGetAllLaunches, httpAddNewLaunch, httpAbortLaunch }
