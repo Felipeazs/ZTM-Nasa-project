@@ -11,7 +11,6 @@ async function httpGetLaunches() {
 }
 
 async function httpSubmitLaunch(launch) {
-	console.log(launch);
 	try {
 		return await fetch(`${process.env.REACT_APP_API_URL}/launches`, {
 			method: 'POST',
@@ -28,8 +27,15 @@ async function httpSubmitLaunch(launch) {
 }
 
 async function httpAbortLaunch(id) {
-	// TODO: Once API is ready.
-	// Delete launch with given ID.
+	try {
+		return await fetch(`${process.env.REACT_APP_API_URL}/launches/${id}`, {
+			method: 'DELETE',
+		});
+	} catch (error) {
+		return {
+			ok: false,
+		};
+	}
 }
 
 export { httpGetPlanets, httpGetLaunches, httpSubmitLaunch, httpAbortLaunch };
