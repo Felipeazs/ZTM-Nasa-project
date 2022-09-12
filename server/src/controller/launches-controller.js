@@ -1,25 +1,39 @@
-const {
-    launchesModel,
-    addNewLaunch,
-    existsLaunchWithID,
-    abortLaunchById,
-} = require('../models/launches-model')
+const { existsLaunchWithID, abortLaunchById } = require('../models/launches-model')
 
-const httpGetAllLaunches = (req, res, next) => {
-    return res.status(200).json(launchesModel())
+const Launch = require('../models/launches-mongo')
+
+const httpGetAllLaunches = async (req, res, next) => {
+    try {
+        const launches = await Launch.find({}, { __v: 0, _id: 0 })
+
+        return res.status(200).json(launches)
+    } catch (err) {
+        const error = new Error('Launches not found')
+        error.statusCode = 404
+        next(error)
+    }
 }
 
-const httpAddNewLaunch = (req, res, next) => {
+const httpAddNewLaunch = async (req, res, next) => {
     const { mission, rocket, target, launchDate } = req.body
 
     if (!mission || !rocket || !target || !launchDate) {
         return res.status(400).json({ error: 'Missing required launch property' })
     }
 
+    const latestFlight = await Launch.findOne().sort('-flightNumber')
+
+    if (!latestFlight) {
+        latestFlight.flightNumber = 100
+    }
+
     const newLaunch = {
         mission,
         rocket,
         target,
+        success: true,
+        customers: ['ZTM', 'NASA'],
+        flightNumber: latestFlight.flightNumber++,
         launchDate: new Date(launchDate),
     }
 
@@ -27,9 +41,18 @@ const httpAddNewLaunch = (req, res, next) => {
         return res.status(400).json({ error: 'Invalid launch date' })
     }
 
-    addNewLaunch(newLaunch)
+    let createdLaunch
 
-    return res.status(201).json(newLaunch)
+    try {
+        createdLaunch = await Launch.create(newLaunch)
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500
+        }
+        next(err)
+    }
+
+    return res.status(201).json(createdLaunch)
 }
 
 const httpAbortLaunch = (req, res, next) => {

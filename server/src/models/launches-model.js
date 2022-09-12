@@ -1,4 +1,5 @@
-//const Launch = require('./launches-mongo')
+const Launch = require('./launches-mongo')
+const Planet = require('./planets-mongo')
 
 const launches = new Map()
 
@@ -16,28 +17,33 @@ const launch = {
     id: 1,
 }
 
-const launchesModel = () => {
-    return Array.from(launches.values())
-}
-
 const existsLaunchWithID = launchId => {
     return launches.has(launchId)
 }
 
-const addNewLaunch = launch => {
-    latestFlightNumber++
-    launches.set(
-        latestFlightNumber,
-        Object.assign(launch, {
-            success: true,
-            customers: ['ZTM', 'NASA'],
-            upcoming: true,
-            flightNumber: latestFlightNumber,
-        })
-    )
+const saveLaunch = async launch => {
+    try {
+        const planet = await Planet.findOne({ keplerName: launch.target })
 
-    return launch
+        if (!planet) {
+            const error = new Error('Planet not found')
+            error.statusCode = 400
+            throw error
+        }
+
+        await Launch.updateOne(
+            {
+                flightNumber: launch.flightNumber,
+            },
+            launch,
+            { upsert: true }
+        )
+    } catch (err) {
+        console.log(err)
+    }
 }
+
+saveLaunch(launch)
 
 const abortLaunchById = launchId => {
     const aborted = launches.get(launchId)
@@ -46,11 +52,7 @@ const abortLaunchById = launchId => {
     return aborted
 }
 
-launches.set(launch.flightNumber, launch)
-
 module.exports = {
-    launchesModel,
-    addNewLaunch,
     existsLaunchWithID,
     abortLaunchById,
 }
