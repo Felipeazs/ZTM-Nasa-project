@@ -1,10 +1,9 @@
 const fs = require('fs')
 const path = require('path')
 const { parse } = require('csv-parse')
+const Planet = require('./planets-mongo')
 
 const { error, info } = require('../../colors-config')
-
-const habitablePlanets = []
 
 const isHabitable = planet => {
     return (
@@ -23,8 +22,21 @@ const loadPlanetsData = async () => {
                 columns: true,
             })
         )
-        .on('data', data => {
-            if (isHabitable(data)) habitablePlanets.push(data)
+        .on('data', async data => {
+            if (isHabitable(data)) {
+                // apply upsert to save planets just once
+                try {
+                    await Planet.updateOne(
+                        {
+                            keplerName: data.kepler_name,
+                        },
+                        { keplerName: data.kepler_name },
+                        { upsert: true }
+                    )
+                } catch (err) {
+                    error('Could not save a planet')
+                }
+            }
         })
         .on('error', err => {
             error(err.message)
@@ -34,4 +46,4 @@ const loadPlanetsData = async () => {
         })
 }
 
-module.exports = { loadPlanetsData, habitablePlanets }
+module.exports = { loadPlanetsData }
