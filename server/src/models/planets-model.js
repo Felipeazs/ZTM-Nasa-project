@@ -30,7 +30,7 @@ const loadPlanetsData = async () => {
             error(err.message)
         })
         .on('end', () => {
-            info('Planets data loaded')
+            info('Planets data loaded...')
         })
 }
 
