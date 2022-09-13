@@ -2,8 +2,7 @@ const express = require('express')
 const path = require('path')
 const cors = require('cors')
 
-const planetsRouter = require('./router/planets-router')
-const launchesRouter = require('./router/launches-router')
+const api = require('./router/api')
 
 const app = express()
 app.use(express.json())
@@ -24,8 +23,7 @@ app.use((error, req, res, next) => {
 })
 
 //routes: always before serving static files
-app.use('/planets', planetsRouter)
-app.use('/launches', launchesRouter)
+app.use('/v1', api)
 
 //serve the public folder statically
 app.use(express.static(path.join(__dirname, '..', 'public')))

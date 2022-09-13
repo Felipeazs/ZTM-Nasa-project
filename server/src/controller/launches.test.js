@@ -1,7 +1,10 @@
 const request = require('supertest')
+const dotenv = require('dotenv').config()
 
 const { connectDB, disconnectDB } = require('../utils/db')
 const app = require('../app')
+
+const API_V1 = process.env.API_V1
 
 describe('Launches API', () => {
     beforeAll(async () => {
@@ -12,7 +15,7 @@ describe('Launches API', () => {
     describe('test GET /launches', () => {
         test('it should response with 200 success', async () => {
             const response = await request(app)
-                .get('/launches')
+                .get(`/${API_V1}/launches`)
                 .expect('Content-type', /json/)
                 .expect(200)
         })
@@ -39,7 +42,7 @@ describe('Launches API', () => {
         test('is should response with 201 created', async () => {
             //supertest api
             const response = await request(app)
-                .post('/launches')
+                .post(`/${API_V1}/launches`)
                 .send(launchWithDate)
                 .expect('Content-type', /json/)
                 .expect(201)
@@ -57,7 +60,7 @@ describe('Launches API', () => {
         test('it should catch missing required properties', async () => {
             //supertest api
             const response = await request(app)
-                .post('/launches')
+                .post(`/${API_V1}/launches`)
                 .send(launchWithoutDate)
                 .expect('Content-type', /json/)
                 .expect(400)
@@ -72,7 +75,7 @@ describe('Launches API', () => {
         test('it should catch invalid dates', async () => {
             //supertest api
             const response = await request(app)
-                .post('/launches')
+                .post(`/${API_V1}/launches`)
                 .send(launchDateWihInvalidDate)
                 .expect('Content-type', /json/)
                 .expect(400)
