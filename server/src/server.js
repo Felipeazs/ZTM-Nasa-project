@@ -4,6 +4,7 @@ const dotenv = require('dotenv').config()
 
 const { connectDB } = require('./utils/db')
 const { loadPlanetsData } = require('./models/planets-model')
+const { loadLaunchesData } = require('./models/launches-model')
 
 const { info, error } = require('../colors-config')
 
@@ -15,6 +16,7 @@ const startServer = async () => {
     connectDB()
 
     await loadPlanetsData()
+    await loadLaunchesData()
 
     server.listen(PORT, async () => {
         //Load planets on initial server start

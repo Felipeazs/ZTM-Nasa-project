@@ -1,6 +1,5 @@
-const { existsLaunchWithID, abortLaunchById } = require('../models/launches-model')
-
 const Launch = require('../models/launches-mongo')
+const Planet = require('../models/planets-mongo')
 
 const httpGetAllLaunches = async (req, res, next) => {
     try {
@@ -19,6 +18,14 @@ const httpAddNewLaunch = async (req, res, next) => {
 
     if (!mission || !rocket || !target || !launchDate) {
         return res.status(400).json({ error: 'Missing required launch property' })
+    }
+
+    const planet = await Planet.findOne({ keplerName: new Date(launchDate) })
+
+    if (!planet) {
+        const error = new Error('Planet not found')
+        error.statusCode = 400
+        throw error
     }
 
     const latestFlight = await Launch.findOne().sort({ flightNumber: -1 })

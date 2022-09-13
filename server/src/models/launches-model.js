@@ -1,7 +1,9 @@
+const axios = require('axios')
+const dotenv = require('dotenv').config()
+
 const Launch = require('./launches-mongo')
 const Planet = require('./planets-mongo')
-
-const launches = new Map()
+const { info } = require('../../colors-config')
 
 let latestFlightNumber = 100
 
@@ -17,20 +19,8 @@ const launch = {
     id: 1,
 }
 
-const existsLaunchWithID = launchId => {
-    return launches.has(launchId)
-}
-
 const saveLaunch = async launch => {
     try {
-        const planet = await Planet.findOne({ keplerName: launch.target })
-
-        if (!planet) {
-            const error = new Error('Planet not found')
-            error.statusCode = 400
-            throw error
-        }
-
         await Launch.updateOne(
             {
                 flightNumber: launch.flightNumber,
@@ -45,14 +35,65 @@ const saveLaunch = async launch => {
 
 saveLaunch(launch)
 
-const abortLaunchById = launchId => {
-    const aborted = launches.get(launchId)
-    aborted.upcoming = false
-    aborted.success = false
-    return aborted
+const findLaunch = async launchId => {
+    return await Launch.findOne({
+        flightNumber: launchId,
+    })
+}
+
+const loadLaunchesData = async () => {
+    const firstLaunch = await findLaunch(1)
+
+    if (firstLaunch) {
+        info('Spacex data already downloaded...')
+        return
+    }
+
+    info('Downloading Spacex data...')
+
+    //populate launches collection
+    const res = await axios.post(`${process.env.SPACEX_API}`, {
+        query: {},
+        options: {
+            pagination: false,
+            populate: [
+                {
+                    path: 'rocket',
+                    select: {
+                        name: 1,
+                    },
+                },
+                {
+                    path: 'payloads',
+                    select: {
+                        customers: 1,
+                    },
+                },
+            ],
+        },
+    })
+
+    const launchDocs = res.data.docs
+
+    for (const launchDoc of launchDocs) {
+        const launch = {
+            flightNumber: launchDoc['flight_number'],
+            rocket: launchDoc['rocket']['name'],
+            mission: launchDoc['name'],
+            launchDate: launchDoc['date_local'],
+            upcoming: launchDoc['upcoming'],
+            success: launchDoc['success'],
+            customers: launchDoc['payloads'].flatMap(payload => {
+                return payload['customers']
+            }),
+        }
+
+        await saveLaunch(launch)
+    }
+
+    info('Spacex data loaded...')
 }
 
 module.exports = {
-    existsLaunchWithID,
-    abortLaunchById,
+    loadLaunchesData,
 }

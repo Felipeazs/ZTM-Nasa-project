@@ -20,5 +20,8 @@
 	"bugs": {
 		"url": "https://github.com/Felipeazs/ZTM-Nasa-project/issues"
 	},
-	"homepage": "https://github.com/Felipeazs/ZTM-Nasa-project#readme"
+	"homepage": "https://github.com/Felipeazs/ZTM-Nasa-project#readme",
+	"dependencies": {
+		"axios": "^0.27.2"
+	}
 }
