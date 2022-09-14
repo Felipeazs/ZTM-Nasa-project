@@ -9,7 +9,7 @@ jobs:
         name: mongodb and test
         strategy:
             matrix:
-                node-version: [16.x]
+                node-version: [16]
                 mongodb-version: ['6.0']
         runs-on: ubuntu-latest
 
