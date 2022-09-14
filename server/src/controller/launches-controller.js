@@ -1,9 +1,16 @@
 const Launch = require('../models/launches-mongo')
 const Planet = require('../models/planets-mongo')
 
+const { getPagination } = require('../utils/query')
+
 const httpGetAllLaunches = async (req, res, next) => {
+    const { skip, limit } = getPagination(req.query)
+
     try {
         const launches = await Launch.find({}, { __v: 0, _id: 0 })
+            .sort({ flightNumber: 1 })
+            .skip(skip)
+            .limit(limit)
 
         return res.status(200).json(launches)
     } catch (err) {
@@ -29,10 +36,6 @@ const httpAddNewLaunch = async (req, res, next) => {
     }
 
     const latestFlight = await Launch.findOne().sort({ flightNumber: -1 })
-
-    if (!latestFlight) {
-        latestFlight.flightNumber = 100
-    }
 
     const newLaunch = {
         mission,

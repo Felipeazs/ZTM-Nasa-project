@@ -3,21 +3,9 @@ const dotenv = require('dotenv').config()
 
 const Launch = require('./launches-mongo')
 const Planet = require('./planets-mongo')
-const { info } = require('../../colors-config')
+const { info, error } = require('../../colors-config')
 
 let latestFlightNumber = 100
-
-const launch = {
-    flightNumber: 100,
-    mission: 'Kepler Exploration X',
-    rocket: 'Explorer IS1',
-    target: 'Kepler-442 b',
-    launchDate: 'January 4, 2028',
-    customers: ['ZTM', 'NASA'],
-    upcoming: true,
-    success: true,
-    id: 1,
-}
 
 const saveLaunch = async launch => {
     try {
@@ -29,16 +17,18 @@ const saveLaunch = async launch => {
             { upsert: true }
         )
     } catch (err) {
-        console.log(err)
+        error(err.message)
     }
 }
 
-saveLaunch(launch)
-
 const findLaunch = async launchId => {
-    return await Launch.findOne({
-        flightNumber: launchId,
-    })
+    try {
+        return await Launch.findOne({
+            flightNumber: launchId,
+        })
+    } catch (error) {
+        error('error buscando el launch')
+    }
 }
 
 const loadLaunchesData = async () => {
@@ -87,7 +77,6 @@ const loadLaunchesData = async () => {
                 return payload['customers']
             }),
         }
-
         await saveLaunch(launch)
     }
 
