@@ -8,9 +8,9 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v1
+            - uses: actions/checkout@v2
             - name: use Node.js version 16
-              uses: actions/node@v1
+              uses: actions/node@v2
               with:
                   node-version: '16'
             - run: yarn install
