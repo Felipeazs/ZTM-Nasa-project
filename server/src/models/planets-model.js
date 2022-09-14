@@ -34,7 +34,11 @@ const loadPlanetsData = async () => {
                         { upsert: true }
                     )
                 } catch (err) {
-                    error('Could not save a planet')
+                    const error = new Error(
+                        'Could not execute the query: Planet.updateOne() in loadPlanetsData'
+                    )
+                    error.status = 500
+                    next(error)
                 }
             }
         })

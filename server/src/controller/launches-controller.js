@@ -1,3 +1,4 @@
+const { info, error } = require('../../colors-config')
 const Launch = require('../models/launches-mongo')
 const Planet = require('../models/planets-mongo')
 
@@ -14,8 +15,8 @@ const httpGetAllLaunches = async (req, res, next) => {
 
         return res.status(200).json(launches)
     } catch (err) {
-        const error = new Error('Launches not found')
-        error.statusCode = 404
+        const error = new Error('Could not execute the query: Launch.find() in httpGetAllLaunches')
+        error.status = 500
         next(error)
     }
 }
@@ -24,18 +25,30 @@ const httpAddNewLaunch = async (req, res, next) => {
     const { mission, rocket, target, launchDate } = req.body
 
     if (!mission || !rocket || !target || !launchDate) {
+        error('Please provide all the required fields')
         return res.status(400).json({ error: 'Missing required launch property' })
     }
 
-    const planet = await Planet.findOne({ keplerName: new Date(launchDate) })
+    try {
+        const planet = await Planet.findOne({ keplerName: new Date(launchDate) })
 
-    if (!planet) {
-        const error = new Error('Planet not found')
-        error.statusCode = 400
-        throw error
+        if (!planet) {
+            error('Planet not found in the database')
+            return res.status(400).json({ message: 'Planet not found' })
+        }
+    } catch (err) {
+        const error = new Error('Could not execute the query: Planet.findOne() in httAddNewLaunch')
+        error.status = 500
+        next(error)
     }
 
-    const latestFlight = await Launch.findOne().sort({ flightNumber: -1 })
+    try {
+        const latestFlight = await Launch.findOne().sort({ flightNumber: -1 })
+    } catch (err) {
+        const error = new Error('Could not execute the query: Launch.findOne() in httAddNewLaunch')
+        error.status = 500
+        next(error)
+    }
 
     const newLaunch = {
         mission,
@@ -52,34 +65,44 @@ const httpAddNewLaunch = async (req, res, next) => {
         return res.status(400).json({ error: 'Invalid launch date' })
     }
 
-    let createdLaunch
-
     try {
-        createdLaunch = await Launch.create(newLaunch)
-    } catch (err) {
-        next(err)
-    }
+        const createdLaunch = await Launch.create(newLaunch)
 
-    return res.status(201).json(createdLaunch)
+        return res.status(201).json(createdLaunch)
+    } catch (err) {
+        const error = new Error('Could not execute the query: Launch.create() in httAddNewLaunch')
+        error.status = 500
+        next(error)
+    }
 }
 
 const httpAbortLaunch = async (req, res, next) => {
     const launchId = +req.params.id
 
-    const foundLaunch = await Launch.findOne({ flightNumber: launchId })
+    try {
+        const foundLaunch = await Launch.findOne({ flightNumber: launchId })
+    } catch (err) {
+        const error = new Error('Could not execute the query: Launch.findOne() in httpAbortLaunch')
+        error.status = 500
+        next(error)
+    }
 
     if (!foundLaunch) {
         return res.status(400).json({ message: 'Launch not found' })
     }
 
-    let abortedLaunch
-
     try {
-        abortedLaunch = await Launch.updateOne(
+        const abortedLaunch = await Launch.updateOne(
             { flightNumber: launchId },
             { upcoming: false, success: false }
         )
-    } catch (error) {
+
+        return res.status(200).json(abortedLaunch)
+    } catch (err) {
+        const error = new Error(
+            'Could not execute the query: Launch.updateOne() in httpAbortLaunch'
+        )
+        error.status = 500
         next(error)
     }
 

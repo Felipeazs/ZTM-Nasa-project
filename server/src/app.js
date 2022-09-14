@@ -2,6 +2,8 @@ const express = require('express')
 const path = require('path')
 const cors = require('cors')
 
+const { info, error } = require('../colors-config')
+
 const api = require('./router/api')
 
 const app = express()
@@ -14,16 +16,16 @@ app.use(
     })
 )
 
-//error handling
-app.use((error, req, res, next) => {
-    const status = error.statusCode || 500
-    const message = error.message
-    const data = error.data
-    res.status(status).json(message, data)
-})
-
 //routes: always before serving static files
 app.use('/v1', api)
+
+//error handling
+app.use((err, req, res, next) => {
+    error(`${req.method}${req.baseUrl}${req.url} - ${err.status}- ${err.message.toString()}`)
+    const status = err.status || 500
+    const message = err.message
+    res.status(status).json(message)
+})
 
 //serve the public folder statically
 app.use(express.static(path.join(__dirname, '..', 'public')))

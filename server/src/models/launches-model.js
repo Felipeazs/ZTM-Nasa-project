@@ -17,7 +17,9 @@ const saveLaunch = async launch => {
             { upsert: true }
         )
     } catch (err) {
-        error(err.message)
+        const error = new Error('Could not execute the query: Launch.updateOne() in saveLaunch')
+        error.status = 500
+        next(error)
     }
 }
 
@@ -26,8 +28,10 @@ const findLaunch = async launchId => {
         return await Launch.findOne({
             flightNumber: launchId,
         })
-    } catch (error) {
-        error('error buscando el launch')
+    } catch (err) {
+        const error = new Error('Could not execute the query: Launch.findOne() in findLaunch')
+        error.status = 500
+        next(error)
     }
 }
 
@@ -42,26 +46,32 @@ const loadLaunchesData = async () => {
     info('Downloading Spacex data...')
 
     //populate launches collection
-    const res = await axios.post(`${process.env.SPACEX_API}`, {
-        query: {},
-        options: {
-            pagination: false,
-            populate: [
-                {
-                    path: 'rocket',
-                    select: {
-                        name: 1,
+    try {
+        const res = await axios.post(`${process.env.SPACEX_API}`, {
+            query: {},
+            options: {
+                pagination: false,
+                populate: [
+                    {
+                        path: 'rocket',
+                        select: {
+                            name: 1,
+                        },
                     },
-                },
-                {
-                    path: 'payloads',
-                    select: {
-                        customers: 1,
+                    {
+                        path: 'payloads',
+                        select: {
+                            customers: 1,
+                        },
                     },
-                },
-            ],
-        },
-    })
+                ],
+            },
+        })
+    } catch (err) {
+        const error = new Error('Could not execute the request to Spacex api in loadLaunchesData')
+        error.status = 500
+        next(error)
+    }
 
     const launchDocs = res.data.docs
 

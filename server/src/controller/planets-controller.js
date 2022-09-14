@@ -6,7 +6,9 @@ const getAllPlanets = async (req, res, next) => {
 
         return res.status(200).json(planets)
     } catch (err) {
-        console.log(err)
+        const error = new Error('Could not execute the query: Planet.find() in getAllPlanets')
+        error.status = 500
+        next(error)
     }
 }
 
